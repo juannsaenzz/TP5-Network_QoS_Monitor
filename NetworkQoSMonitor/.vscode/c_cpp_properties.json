@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "React Native iOS",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/node_modules/react-native/React/**",
+                "${workspaceFolder}/node_modules/react-native/ReactCommon/**"
+            ],
+            "defines": [],
+            "compilerPath": "",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
