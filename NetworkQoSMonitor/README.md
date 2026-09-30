@@ -1,47 +1,42 @@
-# Network QoS Monitor
+# Network QoS Monitor (App Móvil)
 
 Analizador y visualizador de calidad de red móvil en tiempo real con mapeo de cobertura personal.
-Proyecto desarrollado para la cátedra de Desarrollo de Aplicaciones Móviles.
+Este directorio contiene el código fuente de la aplicación desarrollada en **React Native CLI puro**, con integración de código nativo en **Kotlin** para Android.
 
-## Arquitectura del Proyecto
+> **NOTA IMPORTANTE:** Para la entrega formal, revisión de la arquitectura, diagrama de capas y justificación de decisiones técnicas, por favor refiérase al **Documento Técnico en PDF** ubicado en la raíz del repositorio (`Documento_Tecnico_TP5.md`).
 
-El sistema está dividido en 5 capas claramente delimitadas para separar la adquisición de datos de la interfaz de usuario:
+## Arquitectura de la Interfaz (Presentation Layer)
 
-1. **Native Bridge (`/src/NativeBridge`)**: 
-   - Módulos en Kotlin (Android) y Swift (iOS) que exponen la información profunda de las antenas mediante el `TelephonyManager`.
-2. **Measurement Engine (`/src/MeasurementEngine`)**:
-   - Sondas creadas en TypeScript Puro.
-   - `PingEngine`: Usa TCP Sockets (`react-native-tcp-socket`) para medir latencia y jitter sin ser bloqueado por las políticas HTTP.
-   - `ThroughputEngine`: Mide velocidad de carga y descarga contra el backend en Node.js adjunto.
-3. **Geo Layer (`/src/GeoLayer`)**:
-   - Implementa `@react-native-community/geolocation` para triangular la posición GPS de cada lectura, operando en alta precisión y evitando crasheos nativos en dispositivos modernos.
-4. **Persistence Layer (`/src/PersistenceLayer`)**:
-   - Construido sobre **WatermelonDB** y adaptadores SQLite.
-   - Provee un entorno reactivo: las lecturas de background disparan renders en la UI sin necesidad de hacer polls o usar reducers complejos.
-5. **Presentation Layer (`/src/PresentationLayer`)**:
-   - Patrón de navegación tipo Drawer (`@react-navigation/drawer`).
-   - Pantalla de Mapas de Calor inyectada vía WebView usando **Leaflet**, OpenStreetMap y CartoDB para garantizar renderizado multiplataforma sin depender de Google Play Services.
-   - Gráficos de líneas con series temporales usando `victory-native` (Skia).
+- **Navegación:** Implementada con React Navigation (Bottom Tabs).
+- **Mapas (Historial):** Se utiliza `react-native-maps` para renderizar el mapa nativo de Android (Google Maps) con gradientes y marcadores geolocalizados.
+- **Gráficos:** Desarrollados 100% nativos usando `Flexbox` puro (sin librerías externas de gráficos) para garantizar el máximo rendimiento (FPS) en la visualización histórica.
+- **Iconografía:** Inyectada mediante trazados vectoriales puros (`react-native-svg`) para evitar problemas de enlazado de fuentes en los empaquetados nativos.
 
 ## Backend de Throughput
 
-En la carpeta `/backend` se encuentra un microservicio Node.js/Express.
-Para correrlo:
+El motor de Throughput (`ThroughputEngine`) requiere comunicarse con un servidor. En la raíz del repositorio se encuentra la carpeta `/backend` con un microservicio Node.js/Express.
+
+Para probar la descarga y subida desde una conexión Celular (4G):
+1. Levantar el servidor local (`npm start` en el backend).
+2. Exponer el puerto mediante Ngrok (`ngrok http 3000`).
+3. Actualizar la variable de entorno o la URL en el código (`ThroughputEngine.ts`) con el enlace público de Ngrok.
+
+## Instalación y Despliegue en Desarrollo
+
+Para ejecutar el código fuente en modo desarrollo conectado al Metro Bundler:
+
 ```bash
-cd backend
+# 1. Instalar dependencias
 npm install
+
+# 2. Levantar servidor de desarrollo
 npm start
+
+# 3. En otra consola, compilar e instalar en el celular conectado por USB
+npx react-native run-android
 ```
-*Nota: Si se prueba desde un dispositivo físico con red 4G, es necesario exponer este servidor mediante ngrok y actualizar la URL en `ThroughputEngine.ts`.*
 
-## Limitaciones Conocidas y Decisiones de Diseño
-
-- **iOS y RSSI:** Apple restringe el acceso directo a la potencia de la señal (RSSI) en dBm a través de sus APIs públicas (CoreTelephony). En iOS el módulo devuelve `0` para evitar un rechazo en el App Store. En Android funciona nativamente.
-- **Background Fetch:** Las tareas en background dictadas por iOS/Android operan con un mínimo de 15 minutos (por optimización de batería del SO). No se puede forzar un ping cada 1 minuto de manera determinista con la app cerrada.
-- **TCP Sockets para Ping:** En React Native no existe soporte nativo de bajo nivel para paquetes ICMP (Ping tradicional). Se implementó un socket TCP que emula la latencia RTT midiendo los tiempos de handshake.
-- **Topología de Red y Ngrok (Throughput Test):** El backend de medición de velocidad (Node.js) se ejecuta en la red de área local (LAN) del desarrollador. Al desconectar el Wi-Fi para realizar pruebas sobre red celular (4G/5G), el dispositivo móvil adquiere una IP pública del operador y pierde visibilidad de la IP privada del backend (por restricciones de NAT). Para solucionar esto sin incurrir en costos de servidores en la nube (AWS/DigitalOcean), se implementó un túnel inverso con **Ngrok**. Esto expone el servidor local a Internet mediante una URL pública, permitiendo que el celular haga los tests de Throughput sobre 4G. *(Nota: Esto implica que la velocidad máxima reportada en el test está limitada por el ancho de banda del túnel de Ngrok, y no representa el límite físico de la antena celular).*
-- **Mapas y Google Maps API Key:** Durante el desarrollo, `react-native-maps` en Android 14 exigía obligatoriamente una API Key activa con facturación de Google Cloud para renderizar tiles, provocando fondos negros o bloqueos del módulo. Decisión de diseño: Se migró la pantalla del Historial a un motor inyectado de **Leaflet + WebView** (simulando comportamiento de navegador web) usando tiles gratuitos de CartoDB y `leaflet.heat`. Esto garantizó un despliegue sin vendor lock-in ni costos asociados.
-- **Servicio de GPS:** Se descartó `react-native-geolocation-service` a favor de `@react-native-community/geolocation` porque la primera provocaba *crasheos nativos silenciosos* por conflictos con las versiones de `play-services-location` instaladas de fábrica en dispositivos de la marca Samsung.
+*(Recuerde que para correr esta aplicación se necesita el entorno de Android Studio completo, dado que se compila código nativo en Kotlin).*
 
 ## Solución de Problemas Frecuentes (Troubleshooting)
 
@@ -57,11 +52,4 @@ La aplicación en tu celular intentará conectarse a la IP vieja y mostrará una
 5. Escribí tu nueva IP seguida del puerto 8081 (Ej: `192.168.1.15:8081`).
 6. Presioná **Reload**. La app volverá a cargar normalmente.
 
-*(Nota: Para evitar esto en la presentación final de la cátedra, se debe generar un Release APK con `cd android && ./gradlew assembleRelease`, que empaqueta el JS nativamente y permite usar la app 100% desconectada de la PC).*
-
-## Instalación y Despliegue
-
-```bash
-npm install
-npx react-native run-android
-```
+*(Para evitar este problema, utilice directamente el archivo APK de producción `app-release.apk` generado para la entrega, el cual funciona 100% desconectado de la PC).*
