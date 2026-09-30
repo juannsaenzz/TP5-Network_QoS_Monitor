@@ -14,6 +14,7 @@ const payloadSize = 5 * 1024 * 1024;
 const downloadPayload = Buffer.alloc(payloadSize, 'x');
 
 app.get('/download', (req, res) => {
+    console.log(`[${new Date().toLocaleTimeString()}] ⬇️ Petición de DESCARGA recibida. Enviando payload de 5MB...`);
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Length', downloadPayload.length);
     // Para que los proxies y celulares no cacheen esto
@@ -26,6 +27,8 @@ app.get('/download', (req, res) => {
 
 app.post('/upload', (req, res) => {
     const receivedBytes = req.body ? req.body.length : 0;
+    const mbytes = (receivedBytes / (1024 * 1024)).toFixed(2);
+    console.log(`[${new Date().toLocaleTimeString()}] ⬆️ Petición de SUBIDA completada. Recibidos ${mbytes} MB con éxito.`);
     res.json({
         success: true,
         receivedBytes,
