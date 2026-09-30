@@ -52,4 +52,4 @@ La aplicación en tu celular intentará conectarse a la IP vieja y mostrará una
 5. Escribí tu nueva IP seguida del puerto 8081 (Ej: `192.168.1.15:8081`).
 6. Presioná **Reload**. La app volverá a cargar normalmente.
 
-*(Para evitar este problema, utilice directamente el archivo APK de producción `app-release.apk` generado para la entrega, el cual funciona 100% desconectado de la PC).*
+*(Para evitar el error de "Pantalla Roja" del Metro Bundler, utilice directamente el archivo APK de producción `app-release.apk` generado para la entrega. Este ejecutable incluye todo el código empaquetado y no requiere conexión a la PC para renderizar la UI. **Nota:** Para que el test de velocidad (Throughput) funcione, el servidor Backend Node.js y Ngrok deben seguir ejecutándose, ya que la app requiere ese servidor para medir la descarga/subida).*
