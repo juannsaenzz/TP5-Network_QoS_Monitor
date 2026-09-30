@@ -15,7 +15,7 @@ class PingEngine {
    * Realiza un "TCP Ping" (mide el tiempo de establecimiento de conexión TCP)
    * Esto es mucho más preciso a nivel de capa de aplicación que usar un fetch().
    */
-  private async pingHost(host: string, port: number = 80, timeoutMs: number = 2000): Promise<number> {
+  private async pingHost(host: string, port: number = 443, timeoutMs: number = 2000): Promise<number> {
     return new Promise((resolve, reject) => {
       const startTime = Date.now();
       let isResolved = false;
