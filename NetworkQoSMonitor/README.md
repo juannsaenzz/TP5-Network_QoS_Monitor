@@ -3,7 +3,7 @@
 Analizador y visualizador de calidad de red móvil en tiempo real con mapeo de cobertura personal.
 Este directorio contiene el código fuente de la aplicación desarrollada en **React Native CLI puro**, con integración de código nativo en **Kotlin** para Android.
 
-> **NOTA IMPORTANTE:** Para la entrega formal, revisión de la arquitectura, diagrama de capas y justificación de decisiones técnicas, por favor refiérase al **Documento Técnico en PDF** ubicado en la raíz del repositorio (`Documento_Tecnico_TP5.md`).
+> **NOTA IMPORTANTE:** Para la entrega formal, revisión de la arquitectura, diagrama de capas y justificación de decisiones técnicas, por favor refiérase al **Documento Técnico en PDF** ubicado en la raíz del repositorio (`Informe - TP5 Network_QoS_Monitor.pdf`).
 
 ## Arquitectura de la Interfaz (Presentation Layer)
 
